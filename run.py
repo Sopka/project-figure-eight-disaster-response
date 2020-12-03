@@ -2,8 +2,7 @@ import json
 import plotly
 import pandas as pd
 
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
+from tokenizer import tokenizer
 
 from flask import Flask
 from flask import render_template, request, jsonify
@@ -14,23 +13,12 @@ from sqlalchemy import create_engine
 
 app = Flask(__name__)
 
-def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
-
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
-
 # load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
+engine = create_engine('sqlite:///./data/DisasterResponse.db')
 df = pd.read_sql_table('messages_categories', engine)
 
 # load model
-model = joblib.load("../models/model.pkl")
+model = joblib.load("./models/model.pkl")
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
