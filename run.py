@@ -10,15 +10,16 @@ from plotly.graph_objs import Bar
 import joblib
 from sqlalchemy import create_engine
 
-
 app = Flask(__name__)
 
 # load data
 engine = create_engine('sqlite:///./data/DisasterResponse.db')
 df = pd.read_sql_table('messages_categories', engine)
+most_counted_tokens = pd.read_sql_table('most_counted_tokens', engine)
 
 # load model
 model = joblib.load("./models/model.pkl")
+print("loaded model:", model)
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -28,6 +29,7 @@ def index():
     # extract data needed for visuals
     classifiers_mean = df[df.columns[4:]].mean()
     classifiers_mean.index = [ c.replace('_', ' ').title() for c in classifiers_mean.index.values]
+    classifiers_mean.sort_values(ascending=False, inplace=True)
 
     # create visuals
     graphs = [
@@ -46,6 +48,26 @@ def index():
                 },
                 'xaxis': {
                     'title': "Classifier",
+                    'automargins': True,
+                    'tickangle': -30
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=most_counted_tokens.tokens,
+                    y=most_counted_tokens.occurance
+                )
+            ],
+
+            'layout': {
+                'title': 'Most counted Tokens',
+                'yaxis': {
+                    'title': "Occurance of Tokens in percentage"
+                },
+                'xaxis': {
+                    'title': "Token name",
                     'automargins': True,
                     'tickangle': -30
                 }
